@@ -1,0 +1,18 @@
+== Preparacion backend ==
+
+== Levantando servicios ==
+
+Backend health: 200
+
+Frontend home: 200
+
+Catalogo mesas: 10
+
+Catalogo pizzas: 4
+
+Catalogo bebidas: 6
+
+EJECUCION COMPLETA OK
+
+Servicios detenidos al finalizar la validacion automatica.
+

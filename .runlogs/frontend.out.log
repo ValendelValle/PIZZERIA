@@ -1,0 +1,6 @@
+
+> pizzeria-pos-frontend@1.0.0 preview
+> vite preview --host 0.0.0.0 --port 5173
+
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://localhost:[1m5173[22m/[39m
+  [32m➜[39m  [1mNetwork[22m: [36mhttp://148.234.48.108:[1m5173[22m/[39m

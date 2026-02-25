@@ -1,0 +1,4 @@
+[24/Feb/2026 20:13:19] "GET /api/health/ HTTP/1.1" 200 41
+[24/Feb/2026 20:13:19,358] - Broken pipe from ('127.0.0.1', 54948)
+[24/Feb/2026 20:13:30] "GET /api/catalogo/ HTTP/1.1" 200 1647
+[24/Feb/2026 20:13:30,899] - Broken pipe from ('127.0.0.1', 54952)
