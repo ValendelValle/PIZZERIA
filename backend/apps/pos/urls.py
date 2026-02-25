@@ -1,0 +1,36 @@
+from django.urls import path
+from .views import (
+    health,
+    CatalogoView,
+    PedidoCreateView,
+    PedidoDetailView,
+    PedidoHistorialView,
+    PedidoCambiarEstadoView,
+    PedidoConfirmarInsumosView,
+    PedidoRequerimientosView,
+    TicketByFolioView,
+    ProduccionTableroView,
+    MesaLiberarView,
+    InventarioIngredientesView,
+    InventarioEntradaView,
+    InventarioMovimientosView,
+    ReporteTopProductosView,
+)
+
+urlpatterns = [
+    path('health/', health),
+    path('catalogo/', CatalogoView.as_view()),
+    path('pedidos/', PedidoCreateView.as_view()),
+    path('pedidos/historial/', PedidoHistorialView.as_view()),
+    path('pedidos/<int:pedido_id>/', PedidoDetailView.as_view()),
+    path('pedidos/<int:pedido_id>/estado/', PedidoCambiarEstadoView.as_view()),
+    path('pedidos/<int:pedido_id>/confirmar-insumos/', PedidoConfirmarInsumosView.as_view()),
+    path('pedidos/<int:pedido_id>/requerimientos/', PedidoRequerimientosView.as_view()),
+    path('tickets/<str:folio>/', TicketByFolioView.as_view()),
+    path('produccion/tablero/', ProduccionTableroView.as_view()),
+    path('mesas/<int:mesa_id>/liberar/', MesaLiberarView.as_view()),
+    path('inventario/ingredientes/', InventarioIngredientesView.as_view()),
+    path('inventario/entradas/', InventarioEntradaView.as_view()),
+    path('inventario/movimientos/', InventarioMovimientosView.as_view()),
+    path('reportes/top-productos/', ReporteTopProductosView.as_view()),
+]

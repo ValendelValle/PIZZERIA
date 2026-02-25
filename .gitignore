@@ -1,0 +1,16 @@
+# Entorno Python
+backend/__pycache__/
+backend/apps/**/__pycache__/
+*.pyc
+*.pyo
+
+# Base de datos local
+backend/db.sqlite3
+
+# Entorno Node
+frontend/node_modules/
+frontend/dist/
+
+# Varios
+.DS_Store
+Thumbs.db

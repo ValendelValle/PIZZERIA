@@ -1,0 +1,75 @@
+erDiagram
+
+    USUARIO {
+        int id_usuario PK
+        string nombre
+        string contrasena
+        enum rol "cajero | admin"
+    }
+
+    MESA {
+        int id_mesa PK
+        int numero_mesa
+        enum estado "libre | ocupada"
+    }
+
+    PRODUCTO {
+        int id_producto PK
+        string nombre
+        enum tipo "pizza | bebida | combo"
+        decimal precio
+        boolean activo
+    }
+
+    PEDIDO {
+        int id_pedido PK
+        string folio
+        datetime fecha_hora
+        enum estado "pendiente | en_horno | listo"
+        decimal total
+        int id_usuario FK
+        int id_mesa FK
+    }
+
+    DETALLE_PEDIDO {
+        int id_detalle PK
+        int cantidad
+        decimal precio_unitario
+        decimal subtotal
+        int id_pedido FK
+        int id_producto FK
+    }
+
+    TICKET {
+        int id_ticket PK
+        string codigo_qr
+        string url_ticket
+        datetime fecha_generacion
+        int id_pedido FK
+    }
+
+    INGREDIENTE {
+        int id_ingrediente PK
+        string nombre
+        string unidad
+        decimal stock_actual
+        decimal stock_minimo
+    }
+
+    MOVIMIENTO_INVENTARIO {
+        int id_movimiento PK
+        enum tipo "entrada | salida"
+        decimal cantidad
+        datetime fecha_hora
+        string observacion
+        int id_ingrediente FK
+        int id_usuario FK
+    }
+
+    USUARIO ||--o{ PEDIDO : "toma"
+    MESA ||--o{ PEDIDO : "asignada a"
+    PEDIDO ||--|| TICKET : "genera"
+    PEDIDO ||--o{ DETALLE_PEDIDO : "contiene"
+    DETALLE_PEDIDO }o--|| PRODUCTO : "incluye"
+    INGREDIENTE ||--o{ MOVIMIENTO_INVENTARIO : "registra"
+    USUARIO ||--o{ MOVIMIENTO_INVENTARIO : "registra"
