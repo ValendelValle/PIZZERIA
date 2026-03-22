@@ -2,7 +2,7 @@ export function money(value) {
   const number = Number(value || 0);
   return new Intl.NumberFormat('es-MX', {
     style: 'currency',
-    currency: 'USD',
+    currency: 'MXN',
     minimumFractionDigits: 2,
   }).format(number);
 }

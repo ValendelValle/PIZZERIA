@@ -12,16 +12,26 @@ class Command(BaseCommand):
         User = get_user_model()
 
         usuarios = [
-            ('cajero', 'cajero123', UsuarioPerfil.Rol.CAJERO),
             ('cocina', 'cocina123', UsuarioPerfil.Rol.PRODUCCION),
             ('admin', 'admin123', UsuarioPerfil.Rol.ADMIN),
         ]
         for username, password, rol in usuarios:
-            user, created = User.objects.get_or_create(username=username, defaults={'is_staff': rol == UsuarioPerfil.Rol.ADMIN})
+            is_admin = rol == UsuarioPerfil.Rol.ADMIN
+            user, created = User.objects.get_or_create(username=username, defaults={'is_staff': is_admin})
             if created:
                 user.set_password(password)
                 user.save()
-            UsuarioPerfil.objects.get_or_create(user=user, defaults={'rol': rol})
+            elif user.is_staff != is_admin:
+                user.is_staff = is_admin
+                user.save(update_fields=['is_staff'])
+
+            perfil, _ = UsuarioPerfil.objects.get_or_create(user=user, defaults={'rol': rol})
+            if perfil.rol != rol:
+                perfil.rol = rol
+                perfil.save(update_fields=['rol'])
+
+        # Limpia usuario legado de cajero si existia de versiones anteriores.
+        User.objects.filter(username='cajero').delete()
 
         for i in range(1, 11):
             Mesa.objects.get_or_create(numero_mesa=i)

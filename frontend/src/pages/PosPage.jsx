@@ -16,6 +16,7 @@ function PosPage() {
   const navigate = useNavigate();
   const [catalog, setCatalog] = useState({});
   const [mesas, setMesas] = useState([]);
+  const [tipoEntrega, setTipoEntrega] = useState('llevar');
   const [mesaId, setMesaId] = useState('');
   const [activeType, setActiveType] = useState('pizza');
   const [cart, setCart] = useState({});
@@ -31,8 +32,9 @@ function PosPage() {
         setCatalog(data.productos || {});
         setMesas(data.mesas || []);
 
-        if (data.mesas?.length > 0) {
-          setMesaId(String(data.mesas[0].id));
+        const primeraMesaLibre = (data.mesas || []).find((mesa) => mesa.estado === 'libre');
+        if (primeraMesaLibre) {
+          setMesaId(String(primeraMesaLibre.id));
         }
 
         const firstType = Object.keys(data.productos || {}).find(
@@ -41,8 +43,9 @@ function PosPage() {
         if (firstType) {
           setActiveType(firstType);
         }
-      } catch {
-        setError('No se pudo cargar el catalogo. Revisa que el backend este activo.');
+      } catch (err) {
+        const detail = err?.response?.data?.detail;
+        setError(detail || 'No se pudo cargar el catalogo. Revisa que el backend y base de datos esten activos.');
       } finally {
         setLoading(false);
       }
@@ -70,6 +73,7 @@ function PosPage() {
   }, [catalog]);
 
   const currentProducts = catalog[activeType] || [];
+  const mesasLibres = useMemo(() => mesas.filter((mesa) => mesa.estado === 'libre'), [mesas]);
 
   const orderItems = useMemo(() => {
     return Object.entries(cart)
@@ -102,8 +106,14 @@ function PosPage() {
     try {
       setProcessing(true);
       setError('');
+
+      if (tipoEntrega === 'mesa' && !mesaId) {
+        setError('Selecciona una mesa libre o cambia a para llevar.');
+        return;
+      }
+
       const payload = {
-        mesa_id: mesaId ? Number(mesaId) : null,
+        mesa_id: tipoEntrega === 'mesa' && mesaId ? Number(mesaId) : null,
         items: orderItems.map((item) => ({ producto_id: item.id, cantidad: item.cantidad })),
       };
 
@@ -111,7 +121,9 @@ function PosPage() {
       setCart({});
       navigate(`/ticket/${data.folio}`);
     } catch (err) {
-      const detail = err?.response?.data?.detail || 'No se pudo crear el pedido.';
+      const detail = Array.isArray(err?.response?.data)
+        ? String(err.response.data[0])
+        : err?.response?.data?.detail || 'No se pudo crear el pedido.';
       setError(detail);
     } finally {
       setProcessing(false);
@@ -119,10 +131,16 @@ function PosPage() {
   };
 
   return (
-    <main className="screen">
+    <main className="screen pos-screen">
       <section className="hero hero-red">
-        <h1>Pizzeria POS</h1>
-        <p>Selecciona productos y finaliza el pedido</p>
+        <h1>Ordena Tu Pizza</h1>
+        <p>Modulo publico de autoservicio: selecciona, paga y recibe tu ticket QR</p>
+      </section>
+
+      <section className="pos-trust">
+        <p>Pago simulado seguro</p>
+        <p>Ticket digital sin impresion</p>
+        <p>Entrega en mesa o para llevar</p>
       </section>
 
       {error && <p className="error-box">{error}</p>}
@@ -130,14 +148,25 @@ function PosPage() {
       <section className="pos-layout">
         <div className="pos-main">
           <div className="card mesa-card">
-            <label htmlFor="mesa-select">Numero de mesa</label>
-            <select id="mesa-select" value={mesaId} onChange={(e) => setMesaId(e.target.value)}>
-              {mesas.map((mesa) => (
-                <option key={mesa.id} value={mesa.id}>
-                  Mesa {mesa.numero_mesa} ({mesa.estado})
-                </option>
-              ))}
+            <label htmlFor="tipo-entrega">Tipo de pedido</label>
+            <select id="tipo-entrega" value={tipoEntrega} onChange={(e) => setTipoEntrega(e.target.value)}>
+              <option value="llevar">Para llevar</option>
+              <option value="mesa">Consumir en mesa</option>
             </select>
+
+            {tipoEntrega === 'mesa' && (
+              <>
+                <label htmlFor="mesa-select">Mesa libre</label>
+                <select id="mesa-select" value={mesaId} onChange={(e) => setMesaId(e.target.value)}>
+                  <option value="">Selecciona una mesa</option>
+                  {mesasLibres.map((mesa) => (
+                    <option key={mesa.id} value={mesa.id}>
+                      Mesa {mesa.numero_mesa}
+                    </option>
+                  ))}
+                </select>
+              </>
+            )}
           </div>
 
           <CategoryTabs categories={categories} active={activeType} onChange={setActiveType} />

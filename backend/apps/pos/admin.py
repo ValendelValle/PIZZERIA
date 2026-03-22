@@ -9,6 +9,7 @@ from .models import (
     DetallePedido,
     Ticket,
     MovimientoInventario,
+    AdminAccion,
 )
 
 admin.site.register(UsuarioPerfil)
@@ -20,3 +21,4 @@ admin.site.register(Pedido)
 admin.site.register(DetallePedido)
 admin.site.register(Ticket)
 admin.site.register(MovimientoInventario)
+admin.site.register(AdminAccion)

@@ -1,6 +1,6 @@
 from decimal import Decimal
+from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.utils import timezone
 from rest_framework import serializers
 from .models import (
     Mesa,
@@ -10,8 +10,11 @@ from .models import (
     Ticket,
     Ingrediente,
     MovimientoInventario,
-    RecetaProducto,
+    UsuarioPerfil,
+    AdminAccion,
 )
+
+User = get_user_model()
 
 
 class MesaSerializer(serializers.ModelSerializer):
@@ -140,3 +143,40 @@ class RequerimientoInsumoSerializer(serializers.Serializer):
     requerido = serializers.DecimalField(max_digits=10, decimal_places=2)
     stock_actual = serializers.DecimalField(max_digits=10, decimal_places=2)
     stock_suficiente = serializers.BooleanField()
+
+
+class UserSessionSerializer(serializers.ModelSerializer):
+    rol = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'first_name', 'last_name', 'is_staff', 'rol']
+
+    def get_rol(self, user):
+        if user.is_superuser or user.is_staff:
+            return UsuarioPerfil.Rol.ADMIN
+        perfil = getattr(user, 'perfil', None)
+        if perfil and perfil.rol in {UsuarioPerfil.Rol.PRODUCCION, UsuarioPerfil.Rol.ADMIN}:
+            return perfil.rol
+        return UsuarioPerfil.Rol.PRODUCCION
+
+
+class AdminAccionSerializer(serializers.ModelSerializer):
+    creado_por_username = serializers.CharField(source='creado_por.username', read_only=True)
+
+    class Meta:
+        model = AdminAccion
+        fields = [
+            'id',
+            'entidad',
+            'accion',
+            'entidad_id',
+            'antes',
+            'despues',
+            'detalle',
+            'creado_en',
+            'creado_por',
+            'creado_por_username',
+            'deshecha',
+            'deshecha_en',
+        ]

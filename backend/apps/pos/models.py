@@ -9,12 +9,11 @@ User = get_user_model()
 
 class UsuarioPerfil(models.Model):
     class Rol(models.TextChoices):
-        CAJERO = 'cajero', 'Cajero'
         PRODUCCION = 'produccion', 'Produccion'
         ADMIN = 'admin', 'Admin'
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil')
-    rol = models.CharField(max_length=20, choices=Rol.choices, default=Rol.CAJERO)
+    rol = models.CharField(max_length=20, choices=Rol.choices, default=Rol.PRODUCCION)
 
     def __str__(self):
         return f"{self.user.username} ({self.get_rol_display()})"
@@ -162,3 +161,33 @@ class MovimientoInventario(models.Model):
 
     def __str__(self):
         return f"{self.tipo} {self.cantidad} {self.ingrediente.unidad} {self.ingrediente.nombre}"
+
+
+class AdminAccion(models.Model):
+    class Entidad(models.TextChoices):
+        PRODUCTO = 'producto', 'Producto'
+        INGREDIENTE = 'ingrediente', 'Ingrediente'
+        MESA = 'mesa', 'Mesa'
+        INVENTARIO_ENTRADA = 'inventario_entrada', 'Entrada Inventario'
+
+    class Accion(models.TextChoices):
+        CREAR = 'crear', 'Crear'
+        ACTUALIZAR = 'actualizar', 'Actualizar'
+        ELIMINAR = 'eliminar', 'Eliminar'
+
+    entidad = models.CharField(max_length=40, choices=Entidad.choices)
+    accion = models.CharField(max_length=20, choices=Accion.choices)
+    entidad_id = models.PositiveIntegerField(null=True, blank=True)
+    antes = models.JSONField(null=True, blank=True)
+    despues = models.JSONField(null=True, blank=True)
+    detalle = models.CharField(max_length=255, blank=True)
+    creado_en = models.DateTimeField(default=timezone.now)
+    creado_por = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='acciones_admin')
+    deshecha = models.BooleanField(default=False)
+    deshecha_en = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ['-creado_en']
+
+    def __str__(self):
+        return f"{self.entidad} - {self.accion} ({self.entidad_id})"

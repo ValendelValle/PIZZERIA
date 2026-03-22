@@ -43,6 +43,8 @@ def crear_pedido_desde_carrito(items, mesa_id=None, usuario=None):
         mesa = Mesa.objects.select_for_update().filter(pk=mesa_id).first()
         if not mesa:
             raise ValidationError('La mesa seleccionada no existe.')
+        if mesa.estado == Mesa.Estado.OCUPADA:
+            raise ValidationError('La mesa seleccionada ya esta ocupada. Elige otra mesa o para llevar.')
 
     folio = generar_folio()
     pedido = Pedido.objects.create(

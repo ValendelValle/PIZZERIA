@@ -1,52 +1,40 @@
-# Arquitectura del sistema
+﻿# Arquitectura del sistema
 
 ## Resumen
 
-El sistema se divide en dos capas:
+1. Frontend publico (`/`): autoservicio para cliente final.
+2. Frontend staff (`/staff/login`, `/produccion`, `/admin-panel`): operacion interna por rol.
+3. Backend Django REST: reglas de negocio, permisos por rol y persistencia.
 
-1. Backend `Django REST`
-- Exponer endpoints para POS, produccion, inventario y reportes.
-- Aplicar reglas de negocio de pedidos e inventario.
-- Persistir informacion en SQLite.
+## Roles
 
-2. Frontend `React + Vite`
-- UI para roles escolares: caja, cocina y admin.
-- Consumir la API via Axios.
-- Mantener experiencia similar a referencias de pantallas.
+- Cliente final: sin autenticacion, solo puede ordenar y consultar ticket por QR.
+- `produccion`: tablero de cocina y estados de pedidos.
+- `admin`: control total (inventario, reportes, CRUD catalogos y mesas).
 
-## Modelo de datos principal
+## Modelo de datos
 
-Entidades base:
-- `Mesa`: numero y estado (`libre`, `ocupada`).
-- `Producto`: pizzas, bebidas, postres y combos.
-- `Pedido`: folio, estado, subtotal, impuesto, total, mesa.
-- `DetallePedido`: productos del pedido con cantidad y subtotales.
-- `Ticket`: QR y URL de ticket digital.
-- `Ingrediente`: stock actual/minimo.
-- `RecetaProducto`: consumo de ingredientes por producto.
-- `MovimientoInventario`: entradas y salidas con trazabilidad.
+- `Mesa`, `Producto`, `Pedido`, `DetallePedido`, `Ticket`
+- `Ingrediente`, `RecetaProducto`, `MovimientoInventario`
+- `UsuarioPerfil` (solo staff interno)
+- `AdminAccion` (bitacora para hacer/deshacer en panel admin)
 
-## Componentes backend
+## Backend
 
-- `models.py`: entidades y relaciones.
-- `services.py`:
-  - creacion de pedido
-  - calculo de requerimientos de insumos
-  - confirmacion/descuento de inventario
-  - validacion de cambios de estado
-- `views.py`: endpoints REST.
-- `management/commands/seed_data.py`: carga inicial.
+- `services.py`: creacion de pedido, QR, insumos, estados.
+- `permissions.py`: permisos por rol staff.
+- `views.py`: endpoints publicos, protegidos, dashboard admin y deshacer.
 
-## Componentes frontend
+## Frontend
 
-- `pages/PosPage.jsx`: flujo de venta.
-- `pages/TicketPage.jsx`: confirmacion de pago + QR.
-- `pages/ProductionPage.jsx`: tablero cocina y acciones.
-- `pages/AdminPage.jsx`: inventario y reporte.
-- `components/*`: tabs, cards, sidebar y badges.
+- `PosPage.jsx`: modulo publico de ordenes.
+- `TicketPage.jsx`: ticket digital con QR.
+- `LoginPage.jsx`: acceso staff.
+- `ProductionPage.jsx`: cocina.
+- `AdminPage.jsx`: admin + CRUD.
 
-## Consideraciones
+## Consideraciones clave
 
-- Proyecto enfocado en uso escolar local.
-- Seguridad simplificada (sin auth obligatoria).
-- Puede extenderse a JWT, permisos por rol y WebSockets para tiempo real.
+- Pagos simulados.
+- Ticket digital para reducir impresion.
+- La seleccion de mesa valida disponibilidad y soporta opcion para llevar.

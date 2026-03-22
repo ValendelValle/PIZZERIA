@@ -1,20 +1,17 @@
-# API Endpoints
+﻿# API Endpoints
 
 Base URL: `http://localhost:8000/api`
 
-## Salud
+Auth staff: token via `Authorization: Token <token>`.
+
+## Publicos (cliente final)
 
 - `GET /health/`
-  - Respuesta: estado de la API.
-
-## Catalogo y POS
-
 - `GET /catalogo/`
-  - Retorna productos agrupados por tipo y lista de mesas.
-
 - `POST /pedidos/`
-  - Crea pedido y ticket QR.
-  - Body:
+- `GET /tickets/{folio}/`
+
+`POST /pedidos/` ejemplo:
 
 ```json
 {
@@ -26,74 +23,41 @@ Base URL: `http://localhost:8000/api`
 }
 ```
 
-- `GET /pedidos/{pedido_id}/`
-  - Detalle del pedido.
+Para llevar: enviar `"mesa_id": null`.
 
-- `GET /pedidos/historial/?folio=&estado=&fecha_desde=YYYY-MM-DD&fecha_hasta=YYYY-MM-DD`
-  - Historial de pedidos con filtros por folio, estado y rango de fechas.
+## Auth staff
 
-## Produccion
+- `POST /auth/login/`
+- `GET /auth/me/`
+- `POST /auth/logout/`
+
+## Produccion (rol `produccion` o `admin`)
 
 - `GET /produccion/tablero/`
-  - KPIs y ordenes activas (`pendiente`, `en_horno`, `listo`).
-
+- `GET /pedidos/{pedido_id}/`
+- `GET /pedidos/historial/`
 - `GET /pedidos/{pedido_id}/requerimientos/`
-  - Insumos requeridos para el pedido.
-
 - `POST /pedidos/{pedido_id}/confirmar-insumos/`
-  - Descuenta inventario y marca `insumos_confirmados=true`.
-
 - `POST /pedidos/{pedido_id}/estado/`
-  - Cambia estado del pedido.
-  - Body:
-
-```json
-{
-  "estado": "en_horno"
-}
-```
-
-Estados validos:
-- `pendiente`
-- `en_horno`
-- `listo`
-
-## Ticket
-
-- `GET /tickets/{folio}/`
-  - Ticket completo por folio (detalle, totales, QR).
-
-## Mesas
-
 - `POST /mesas/{mesa_id}/liberar/`
-  - Cambia mesa a estado `libre`.
 
-## Inventario
+## Admin (rol `admin`)
 
+- `GET /admin/dashboard/`
+- `GET /admin/acciones/?limite=35`
+- `POST /admin/acciones/{accion_id}/deshacer/`
 - `GET /inventario/ingredientes/`
-  - Lista ingredientes y alerta de stock bajo.
-
 - `POST /inventario/entradas/`
-  - Registra reposicion de inventario.
-  - Body:
-
-```json
-{
-  "ingrediente_id": 2,
-  "cantidad": 5,
-  "observacion": "Compra semanal"
-}
-```
-
 - `GET /inventario/movimientos/`
-  - Historial reciente de entradas/salidas.
+- `GET /reportes/top-productos/?periodo=hoy|semana|mes|todo`
 
-## Reportes
+### CRUD admin
 
-- `GET /reportes/top-productos/?periodo=todo`
+- `GET/POST /admin/productos/`
+- `GET/PATCH/DELETE /admin/productos/{producto_id}/`
 
-Valores `periodo`:
-- `hoy`
-- `semana`
-- `mes`
-- `todo`
+- `GET/POST /admin/ingredientes/`
+- `GET/PATCH/DELETE /admin/ingredientes/{ingrediente_id}/`
+
+- `GET/POST /admin/mesas/`
+- `GET/PATCH/DELETE /admin/mesas/{mesa_id}/`

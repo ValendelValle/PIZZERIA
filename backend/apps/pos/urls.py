@@ -1,5 +1,8 @@
 from django.urls import path
 from .views import (
+    AuthLoginView,
+    AuthMeView,
+    AuthLogoutView,
     health,
     CatalogoView,
     PedidoCreateView,
@@ -15,9 +18,21 @@ from .views import (
     InventarioEntradaView,
     InventarioMovimientosView,
     ReporteTopProductosView,
+    AdminDashboardView,
+    AdminAccionesListView,
+    AdminAccionDeshacerView,
+    AdminProductoListCreateView,
+    AdminProductoDetailView,
+    AdminIngredienteListCreateView,
+    AdminIngredienteDetailView,
+    AdminMesaListCreateView,
+    AdminMesaDetailView,
 )
 
 urlpatterns = [
+    path('auth/login/', AuthLoginView.as_view()),
+    path('auth/me/', AuthMeView.as_view()),
+    path('auth/logout/', AuthLogoutView.as_view()),
     path('health/', health),
     path('catalogo/', CatalogoView.as_view()),
     path('pedidos/', PedidoCreateView.as_view()),
@@ -33,4 +48,13 @@ urlpatterns = [
     path('inventario/entradas/', InventarioEntradaView.as_view()),
     path('inventario/movimientos/', InventarioMovimientosView.as_view()),
     path('reportes/top-productos/', ReporteTopProductosView.as_view()),
+    path('admin/dashboard/', AdminDashboardView.as_view()),
+    path('admin/acciones/', AdminAccionesListView.as_view()),
+    path('admin/acciones/<int:accion_id>/deshacer/', AdminAccionDeshacerView.as_view()),
+    path('admin/productos/', AdminProductoListCreateView.as_view()),
+    path('admin/productos/<int:producto_id>/', AdminProductoDetailView.as_view()),
+    path('admin/ingredientes/', AdminIngredienteListCreateView.as_view()),
+    path('admin/ingredientes/<int:ingrediente_id>/', AdminIngredienteDetailView.as_view()),
+    path('admin/mesas/', AdminMesaListCreateView.as_view()),
+    path('admin/mesas/<int:mesa_id>/', AdminMesaDetailView.as_view()),
 ]
