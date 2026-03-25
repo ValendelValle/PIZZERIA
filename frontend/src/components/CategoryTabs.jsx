@@ -19,8 +19,13 @@ function CategoryTabs({ categories, active, onChange }) {
             onClick={() => onChange(cat.key)}
             type="button"
           >
-            <Icon size={18} />
-            {cat.label}
+            <span className="category-tabs__icon">
+              <Icon size={18} />
+            </span>
+            <span>
+              {cat.label}
+              {typeof cat.count === 'number' && <small>{cat.count} disponibles</small>}
+            </span>
           </button>
         );
       })}

@@ -37,21 +37,21 @@ class Command(BaseCommand):
             Mesa.objects.get_or_create(numero_mesa=i)
 
         productos = {
-            'Pepperoni': ('pizza', Decimal('14.99')),
-            'Hawaiana': ('pizza', Decimal('13.99')),
-            'Champinon': ('pizza', Decimal('13.49')),
-            'Queso': ('pizza', Decimal('12.99')),
-            'Coca Cola': ('bebida', Decimal('2.99')),
-            'Coca Zero': ('bebida', Decimal('2.99')),
-            'Manzanita': ('bebida', Decimal('2.79')),
-            'Limonada': ('bebida', Decimal('2.49')),
-            'Jamaica': ('bebida', Decimal('2.49')),
-            'Horchata': ('bebida', Decimal('2.49')),
-            'Tiramisu': ('postre', Decimal('6.99')),
-            'Panna Cotta': ('postre', Decimal('5.99')),
-            'Combo Individual': ('combo', Decimal('15.99')),
-            'Combo En Pareja': ('combo', Decimal('27.99')),
-            'Combo Familiar': ('combo', Decimal('39.99')),
+            'Pepperoni': ('pizza', Decimal('189.00')),
+            'Hawaiana': ('pizza', Decimal('179.00')),
+            'Champinon': ('pizza', Decimal('169.00')),
+            'Queso': ('pizza', Decimal('159.00')),
+            'Coca Cola': ('bebida', Decimal('32.00')),
+            'Coca Zero': ('bebida', Decimal('32.00')),
+            'Manzanita': ('bebida', Decimal('29.00')),
+            'Limonada': ('bebida', Decimal('34.00')),
+            'Jamaica': ('bebida', Decimal('28.00')),
+            'Horchata': ('bebida', Decimal('28.00')),
+            'Tiramisu': ('postre', Decimal('79.00')),
+            'Panna Cotta': ('postre', Decimal('69.00')),
+            'Combo Individual': ('combo', Decimal('219.00')),
+            'Combo En Pareja': ('combo', Decimal('389.00')),
+            'Combo Familiar': ('combo', Decimal('499.00')),
         }
         producto_map = {}
         for nombre, (tipo, precio) in productos.items():

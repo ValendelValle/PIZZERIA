@@ -1,6 +1,6 @@
 function StatusBadge({ status }) {
   const map = {
-    pendiente: { label: 'Urgente', className: 'is-pending' },
+    pendiente: { label: 'Pendiente', className: 'is-pending' },
     en_horno: { label: 'En horno', className: 'is-oven' },
     listo: { label: 'Listo', className: 'is-ready' },
   };

@@ -1,16 +1,32 @@
 import { ShoppingCart } from 'lucide-react';
 import { money } from '../utils/format';
 
-function OrderSidebar({ items, total, subtotal, impuesto, onPay, processing }) {
+function OrderSidebar({ items, total, subtotal, impuesto, onPay, processing, tipoEntrega, mesaLabel }) {
+  const totalItems = items.reduce((acc, item) => acc + item.cantidad, 0);
+
   return (
     <aside className="order-sidebar">
-      <h2>
-        <ShoppingCart size={24} />
-        Orden actual
-      </h2>
+      <div className="order-sidebar__head">
+        <div>
+          <p className="section-kicker">Pedido actual</p>
+          <h2>
+            <ShoppingCart size={24} />
+            Resumen de compra
+          </h2>
+        </div>
+        <span className="order-sidebar__badge">{totalItems} articulos</span>
+      </div>
+
+      <div className="order-sidebar__meta">
+        <span>{tipoEntrega === 'mesa' ? 'Consumo en mesa' : 'Para llevar'}</span>
+        <span>{mesaLabel || 'Mostrador'}</span>
+      </div>
 
       {items.length === 0 ? (
-        <p className="order-sidebar__empty">No hay productos en la orden</p>
+        <div className="order-sidebar__empty">
+          <strong>Tu carrito esta vacio</strong>
+          <p>Agrega pizzas, bebidas o combos para habilitar el pago simulado.</p>
+        </div>
       ) : (
         <div className="order-sidebar__list">
           {items.map((item) => (

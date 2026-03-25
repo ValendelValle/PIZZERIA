@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle2, QrCode, ReceiptText } from 'lucide-react';
+import { CheckCircle2, Clock3, QrCode, ReceiptText } from 'lucide-react';
 import { Link, useParams } from 'react-router-dom';
 import client from '../api/client';
 import { money } from '../utils/format';
@@ -25,10 +25,12 @@ function TicketPage() {
   if (error) {
     return (
       <main className="screen narrow-screen">
-        <p className="error-box">{error}</p>
-        <Link className="secondary-link" to="/">
-          Volver al POS
-        </Link>
+        <section className="payment-card auth-card">
+          <p className="error-box">{error}</p>
+          <Link className="secondary-link" to="/">
+            Volver al POS
+          </Link>
+        </section>
       </main>
     );
   }
@@ -43,10 +45,22 @@ function TicketPage() {
 
   return (
     <main className="screen narrow-screen">
-      <section className="payment-card">
+      <section className="payment-card ticket-card">
         <CheckCircle2 size={84} className="success-icon" />
+        <p className="section-kicker">Pedido recibido</p>
         <h1>Pago completado</h1>
         <p>Gracias por tu compra. Tu orden se enviara a produccion.</p>
+
+        <div className="ticket-meta-chips">
+          <span>
+            <ReceiptText size={16} />
+            Folio {ticket.folio}
+          </span>
+          <span>
+            <Clock3 size={16} />
+            {new Date(ticket.fecha_hora).toLocaleString('es-MX')}
+          </span>
+        </div>
 
         <article className="ticket-resume">
           <div>
@@ -61,9 +75,39 @@ function TicketPage() {
             <span>Items:</span>
             <strong>{ticket.detalles.reduce((acc, detail) => acc + detail.cantidad, 0)}</strong>
           </div>
+          <div>
+            <span>Subtotal:</span>
+            <strong>{money(ticket.subtotal)}</strong>
+          </div>
+          <div>
+            <span>Impuesto:</span>
+            <strong>{money(ticket.impuesto)}</strong>
+          </div>
           <div className="total-row">
             <span>Total:</span>
             <strong>{money(ticket.total)}</strong>
+          </div>
+        </article>
+
+        <article className="ticket-items">
+          <div className="content-head">
+            <div>
+              <p className="section-kicker">Detalle del consumo</p>
+              <h2>Productos registrados</h2>
+            </div>
+          </div>
+          <div className="ticket-items__list">
+            {ticket.detalles.map((detail, index) => (
+              <div key={`${detail.producto}-${index}`} className="ticket-item">
+                <div>
+                  <strong>{detail.producto}</strong>
+                  <p>
+                    {detail.cantidad} x {money(detail.precio_unitario)}
+                  </p>
+                </div>
+                <span>{money(detail.subtotal)}</span>
+              </div>
+            ))}
           </div>
         </article>
 

@@ -1,7 +1,8 @@
-function PanelSidebar({ title, subtitle, items, activeKey, onChange }) {
+function PanelSidebar({ title, subtitle, items, activeKey, onChange, footer }) {
   return (
     <aside className="panel-sidebar">
       <div className="panel-sidebar__head">
+        <span className="panel-sidebar__eyebrow">Modulo interno</span>
         <h2>{title}</h2>
         {subtitle && <p>{subtitle}</p>}
       </div>
@@ -17,12 +18,17 @@ function PanelSidebar({ title, subtitle, items, activeKey, onChange }) {
               className={`panel-nav-btn ${active ? 'is-active' : ''}`}
               onClick={() => onChange(item.key)}
             >
-              {Icon && <Icon size={16} />}
-              {item.label}
+              <span className="panel-nav-btn__main">
+                {Icon && <Icon size={16} />}
+                {item.label}
+              </span>
+              {item.meta && <span className="panel-nav-btn__meta">{item.meta}</span>}
             </button>
           );
         })}
       </nav>
+
+      {footer && <div className="panel-sidebar__footer">{footer}</div>}
     </aside>
   );
 }

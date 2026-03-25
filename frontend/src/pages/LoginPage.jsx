@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { LockKeyhole, ShieldCheck, UserCog } from 'lucide-react';
 import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 
@@ -44,8 +45,29 @@ function LoginPage() {
   return (
     <main className="screen narrow-screen">
       <section className="payment-card auth-card">
+        <div className="auth-card__icon">
+          <LockKeyhole size={28} />
+        </div>
+        <p className="section-kicker auth-card__kicker">Staff interno</p>
         <h1>Acceso staff</h1>
-        <p>Solo cocina y administracion.</p>
+        <p>Ingreso controlado para produccion y administracion. Las rutas publicas siguen separadas del panel interno.</p>
+
+        <div className="staff-highlights">
+          <article>
+            <ShieldCheck size={18} />
+            <div>
+              <strong>Produccion</strong>
+              <p>Gestiona estados, confirma insumos y libera mesas.</p>
+            </div>
+          </article>
+          <article>
+            <UserCog size={18} />
+            <div>
+              <strong>Administracion</strong>
+              <p>Controla inventario, catalogos, auditoria y reportes.</p>
+            </div>
+          </article>
+        </div>
 
         {error && <p className="error-box">{error}</p>}
 

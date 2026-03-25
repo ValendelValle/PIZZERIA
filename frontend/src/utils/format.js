@@ -1,10 +1,11 @@
 export function money(value) {
   const number = Number(value || 0);
-  return new Intl.NumberFormat('es-MX', {
+  const formatted = new Intl.NumberFormat('es-MX', {
     style: 'currency',
     currency: 'MXN',
     minimumFractionDigits: 2,
   }).format(number);
+  return `${formatted} MXN`;
 }
 
 export function toMinutesAndSeconds(value) {

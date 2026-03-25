@@ -5,18 +5,12 @@ import { money } from '../utils/format';
 import PanelSidebar from '../components/PanelSidebar';
 import StatusBadge from '../components/StatusBadge';
 
-const MODULES = [
-  { key: 'dashboard', label: 'Dashboard', icon: Layers },
-  { key: 'ordenes', label: 'Ordenes cliente', icon: ClipboardList },
-  { key: 'recepcion', label: 'Recepcion', icon: CheckCircle2 },
-  { key: 'historial', label: 'Historial', icon: History },
-];
-
 function ProductionPage() {
   const [activeModule, setActiveModule] = useState('dashboard');
   const [data, setData] = useState({ kpis: { total: 0, urgentes: 0, en_horno: 0, listos: 0 }, pedidos: [] });
   const [historial, setHistorial] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState('');
   const [busyKey, setBusyKey] = useState('');
   const [error, setError] = useState('');
 
@@ -28,6 +22,7 @@ function ProductionPage() {
       ]);
       setData(tableroResp.data);
       setHistorial((historialResp.data || []).slice(0, 20));
+      setLastUpdated(new Date().toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' }));
       setError('');
     } catch (err) {
       setError(err?.response?.data?.detail || 'No se pudo consultar el modulo de produccion.');
@@ -88,6 +83,19 @@ function ProductionPage() {
   const pedidosListos = useMemo(
     () => data.pedidos.filter((pedido) => pedido.estado === 'listo'),
     [data.pedidos]
+  );
+  const pedidosEnHorno = useMemo(
+    () => data.pedidos.filter((pedido) => pedido.estado === 'en_horno'),
+    [data.pedidos]
+  );
+  const moduleItems = useMemo(
+    () => [
+      { key: 'dashboard', label: 'Dashboard', icon: Layers, meta: `${data.kpis.total || 0} activos` },
+      { key: 'ordenes', label: 'Ordenes cliente', icon: ClipboardList, meta: `${pedidosPendientes.length} pendientes` },
+      { key: 'recepcion', label: 'Recepcion', icon: CheckCircle2, meta: `${pedidosListos.length} listos` },
+      { key: 'historial', label: 'Historial', icon: History, meta: `${historial.length} registros` },
+    ],
+    [data.kpis.total, pedidosPendientes.length, pedidosListos.length, historial.length]
   );
 
   const renderOrdersTable = (orders, mode = 'full') => (
@@ -192,17 +200,43 @@ function ProductionPage() {
   return (
     <main className="screen prod-screen">
       <section className="hero hero-orange">
-        <h1>Panel de Produccion</h1>
-        <p>Operacion segmentada por modulo: ordenes, recepcion e historial</p>
+        <div className="hero__grid">
+          <div className="hero__content">
+            <p className="hero__eyebrow">Staff / produccion</p>
+            <h1>Operacion de cocina con foco en estados, tiempos y entrega.</h1>
+            <p>Cola operativa para recibir pedidos, confirmar insumos, avanzar produccion y entregar sin perder trazabilidad.</p>
+          </div>
+
+          <div className="hero__stats">
+            <article className="hero-stat">
+              <span>Pedidos activos</span>
+              <strong>{data.kpis.total}</strong>
+            </article>
+            <article className="hero-stat">
+              <span>En espera</span>
+              <strong>{data.kpis.urgentes}</strong>
+            </article>
+            <article className="hero-stat">
+              <span>Listos</span>
+              <strong>{data.kpis.listos}</strong>
+            </article>
+          </div>
+        </div>
       </section>
 
       <section className="panel-layout">
         <PanelSidebar
           title="Produccion"
           subtitle="Gestion operativa"
-          items={MODULES}
+          items={moduleItems}
           activeKey={activeModule}
           onChange={setActiveModule}
+          footer={
+            <div className="sidebar-note">
+              <strong>Refresco automatico</strong>
+              <p>{lastUpdated ? `Ultima actualizacion: ${lastUpdated}` : 'Consultando tablero...'}.</p>
+            </div>
+          }
         />
 
         <section className="panel-content">
@@ -210,6 +244,19 @@ function ProductionPage() {
 
           {activeModule === 'dashboard' && (
             <>
+              <section className="card ops-note">
+                <div className="content-head">
+                  <div>
+                    <p className="section-kicker">Resumen operativo</p>
+                    <h2>Prioriza pendientes, horno y entrega</h2>
+                  </div>
+                  <span className="section-badge">Actualiza cada 10 segundos</span>
+                </div>
+                <p>
+                  Los pedidos pendientes requieren confirmacion de insumos antes de entrar a horno. Los pedidos listos deben entregarse o liberar mesa cuanto antes.
+                </p>
+              </section>
+
               <section className="kpi-grid">
                 <article className="kpi-card">
                   <p>Total Ordenes</p>
@@ -226,6 +273,83 @@ function ProductionPage() {
                 <article className="kpi-card ready">
                   <p>Listos</p>
                   <strong>{data.kpis.listos}</strong>
+                </article>
+              </section>
+
+              <section className="queue-grid">
+                <article className="card queue-card">
+                  <div className="content-head">
+                    <div>
+                      <p className="section-kicker">Cola inmediata</p>
+                      <h2>Pendientes</h2>
+                    </div>
+                    <span className="section-badge">{pedidosPendientes.length}</span>
+                  </div>
+                  {pedidosPendientes.length === 0 ? (
+                    <div className="empty-state">
+                      <strong>Sin pendientes</strong>
+                      <p>No hay pedidos esperando confirmacion.</p>
+                    </div>
+                  ) : (
+                    <div className="queue-card__list">
+                      {pedidosPendientes.slice(0, 5).map((pedido) => (
+                        <div key={`pending-${pedido.id}`} className="queue-pill">
+                          <strong>{pedido.folio}</strong>
+                          <span>{pedido.tiempo}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </article>
+
+                <article className="card queue-card">
+                  <div className="content-head">
+                    <div>
+                      <p className="section-kicker">En proceso</p>
+                      <h2>Horno</h2>
+                    </div>
+                    <span className="section-badge">{pedidosEnHorno.length}</span>
+                  </div>
+                  {pedidosEnHorno.length === 0 ? (
+                    <div className="empty-state">
+                      <strong>Sin pedidos en horno</strong>
+                      <p>La cola de preparacion esta despejada.</p>
+                    </div>
+                  ) : (
+                    <div className="queue-card__list">
+                      {pedidosEnHorno.slice(0, 5).map((pedido) => (
+                        <div key={`oven-${pedido.id}`} className="queue-pill queue-pill--oven">
+                          <strong>{pedido.folio}</strong>
+                          <span>{pedido.tiempo}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </article>
+
+                <article className="card queue-card">
+                  <div className="content-head">
+                    <div>
+                      <p className="section-kicker">Entrega</p>
+                      <h2>Listos</h2>
+                    </div>
+                    <span className="section-badge">{pedidosListos.length}</span>
+                  </div>
+                  {pedidosListos.length === 0 ? (
+                    <div className="empty-state">
+                      <strong>Sin ordenes listas</strong>
+                      <p>Cuando un pedido termine aparecera aqui.</p>
+                    </div>
+                  ) : (
+                    <div className="queue-card__list">
+                      {pedidosListos.slice(0, 5).map((pedido) => (
+                        <div key={`ready-${pedido.id}`} className="queue-pill queue-pill--ready">
+                          <strong>{pedido.folio}</strong>
+                          <span>{pedido.mesa ? `Mesa ${pedido.mesa}` : 'Mostrador'}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </article>
               </section>
 

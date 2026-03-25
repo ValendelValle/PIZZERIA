@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Clock3, ReceiptText, ShieldCheck, Store } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import client from '../api/client';
 import CategoryTabs from '../components/CategoryTabs';
@@ -58,7 +59,7 @@ function PosPage() {
     () =>
       Object.entries(catalog)
         .filter(([, value]) => Array.isArray(value) && value.length > 0)
-        .map(([key]) => ({ key, label: LABELS[key] || key })),
+        .map(([key, value]) => ({ key, label: LABELS[key] || key, count: value.length })),
     [catalog]
   );
 
@@ -74,6 +75,10 @@ function PosPage() {
 
   const currentProducts = catalog[activeType] || [];
   const mesasLibres = useMemo(() => mesas.filter((mesa) => mesa.estado === 'libre'), [mesas]);
+  const selectedMesa = useMemo(
+    () => mesas.find((mesa) => String(mesa.id) === String(mesaId)),
+    [mesas, mesaId]
+  );
 
   const orderItems = useMemo(() => {
     return Object.entries(cart)
@@ -93,6 +98,7 @@ function PosPage() {
   const subtotal = useMemo(() => orderItems.reduce((acc, item) => acc + item.subtotal, 0), [orderItems]);
   const impuesto = subtotal * 0.16;
   const total = subtotal + impuesto;
+  const totalItems = useMemo(() => orderItems.reduce((acc, item) => acc + item.cantidad, 0), [orderItems]);
 
   const addItem = (productId) => {
     setCart((prev) => ({ ...prev, [productId]: (prev[productId] || 0) + 1 }));
@@ -133,56 +139,133 @@ function PosPage() {
   return (
     <main className="screen pos-screen">
       <section className="hero hero-red">
-        <h1>Ordena Tu Pizza</h1>
-        <p>Modulo publico de autoservicio: selecciona, paga y recibe tu ticket QR</p>
+        <div className="hero__grid">
+          <div className="hero__content">
+            <p className="hero__eyebrow">Publico / clientes</p>
+            <h1>Ordena, paga y recibe tu ticket digital en MXN.</h1>
+            <p>Flujo de autoservicio para pizzeria escolar con seleccion rapida, tipo de entrega claro y ticket QR.</p>
+          </div>
+
+          <div className="hero__stats">
+            <article className="hero-stat">
+              <span>Productos activos</span>
+              <strong>{Object.values(catalog).flat().length}</strong>
+            </article>
+            <article className="hero-stat">
+              <span>Mesas libres</span>
+              <strong>{mesasLibres.length}</strong>
+            </article>
+            <article className="hero-stat">
+              <span>Carrito actual</span>
+              <strong>{totalItems} items</strong>
+            </article>
+          </div>
+        </div>
       </section>
 
       <section className="pos-trust">
-        <p>Pago simulado seguro</p>
-        <p>Ticket digital sin impresion</p>
-        <p>Entrega en mesa o para llevar</p>
+        <p>
+          <ShieldCheck size={16} /> Pago simulado seguro
+        </p>
+        <p>
+          <ReceiptText size={16} /> Ticket digital sin impresion
+        </p>
+        <p>
+          <Store size={16} /> Entrega en mesa o para llevar
+        </p>
+        <p>
+          <Clock3 size={16} /> Flujo rapido para mostrador
+        </p>
       </section>
 
       {error && <p className="error-box">{error}</p>}
 
       <section className="pos-layout">
         <div className="pos-main">
-          <div className="card mesa-card">
-            <label htmlFor="tipo-entrega">Tipo de pedido</label>
-            <select id="tipo-entrega" value={tipoEntrega} onChange={(e) => setTipoEntrega(e.target.value)}>
-              <option value="llevar">Para llevar</option>
-              <option value="mesa">Consumir en mesa</option>
-            </select>
+          <section className="card pos-intro-card">
+            <div className="content-head">
+              <div>
+                <p className="section-kicker">Configuracion de pedido</p>
+                <h2>Selecciona tipo de entrega y prepara tu orden</h2>
+              </div>
+              <span className="section-badge">Todos los montos en MXN</span>
+            </div>
 
-            {tipoEntrega === 'mesa' && (
-              <>
-                <label htmlFor="mesa-select">Mesa libre</label>
-                <select id="mesa-select" value={mesaId} onChange={(e) => setMesaId(e.target.value)}>
-                  <option value="">Selecciona una mesa</option>
-                  {mesasLibres.map((mesa) => (
-                    <option key={mesa.id} value={mesa.id}>
-                      Mesa {mesa.numero_mesa}
-                    </option>
-                  ))}
+            <div className="pos-flow-grid">
+              <div className="mesa-card">
+                <label htmlFor="tipo-entrega">Tipo de pedido</label>
+                <select id="tipo-entrega" value={tipoEntrega} onChange={(e) => setTipoEntrega(e.target.value)}>
+                  <option value="llevar">Para llevar</option>
+                  <option value="mesa">Consumir en mesa</option>
                 </select>
-              </>
+
+                {tipoEntrega === 'mesa' && (
+                  <label htmlFor="mesa-select">
+                    Mesa libre
+                    <select id="mesa-select" value={mesaId} onChange={(e) => setMesaId(e.target.value)}>
+                      <option value="">Selecciona una mesa</option>
+                      {mesasLibres.map((mesa) => (
+                        <option key={mesa.id} value={mesa.id}>
+                          Mesa {mesa.numero_mesa}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+              </div>
+
+              <div className="pos-delivery-summary">
+                <article>
+                  <strong>{tipoEntrega === 'mesa' ? 'Servicio en mesa' : 'Recolectar en mostrador'}</strong>
+                  <p>{tipoEntrega === 'mesa' ? selectedMesa ? `Mesa ${selectedMesa.numero_mesa} confirmada.` : 'Selecciona una mesa disponible.' : 'No requiere asignacion de mesa.'}</p>
+                </article>
+                <article>
+                  <strong>Catalogo listo</strong>
+                  <p>{categories.length} categorias activas y {Object.values(catalog).flat().length} productos disponibles.</p>
+                </article>
+              </div>
+            </div>
+          </section>
+
+          <section className="card pos-menu-card">
+            <div className="content-head">
+              <div>
+                <p className="section-kicker">Menu disponible</p>
+                <h2>{LABELS[activeType] || 'Selecciona una categoria'}</h2>
+              </div>
+              <span className="section-badge">{currentProducts.length} resultados</span>
+            </div>
+
+            <CategoryTabs categories={categories} active={activeType} onChange={setActiveType} />
+
+            {loading && (
+              <div className="empty-state">
+                <strong>Cargando menu</strong>
+                <p>Consultando productos y mesas disponibles desde el backend.</p>
+              </div>
             )}
-          </div>
 
-          <CategoryTabs categories={categories} active={activeType} onChange={setActiveType} />
+            {!loading && currentProducts.length === 0 && (
+              <div className="empty-state">
+                <strong>Sin productos en esta categoria</strong>
+                <p>Cambia de categoria o revisa el catalogo administrativo.</p>
+              </div>
+            )}
 
-          <div className="product-grid">
-            {!loading &&
-              currentProducts.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  quantity={cart[product.id] || 0}
-                  onAdd={addItem}
-                  onRemove={removeItem}
-                />
-              ))}
-          </div>
+            {!loading && currentProducts.length > 0 && (
+              <div className="product-grid">
+                {currentProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    quantity={cart[product.id] || 0}
+                    onAdd={addItem}
+                    onRemove={removeItem}
+                  />
+                ))}
+              </div>
+            )}
+          </section>
         </div>
 
         <OrderSidebar
@@ -192,6 +275,8 @@ function PosPage() {
           total={total}
           onPay={handlePay}
           processing={processing}
+          tipoEntrega={tipoEntrega}
+          mesaLabel={tipoEntrega === 'mesa' && selectedMesa ? `Mesa ${selectedMesa.numero_mesa}` : 'Mostrador'}
         />
       </section>
     </main>
